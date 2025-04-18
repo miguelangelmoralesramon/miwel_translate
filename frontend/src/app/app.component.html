@@ -7,7 +7,7 @@
   <div class="translation-container">
     <form [formGroup]="translationForm" (ngSubmit)="translate()">
       <div class="input-container">
-        <label for="englishInput">English Text</label>
+        <label for="englishInput">🇬🇧 English Text</label>
         <textarea 
           id="englishInput" 
           formControlName="sentence"
@@ -19,7 +19,7 @@
           spellcheck="false"
         ></textarea>
         <div class="char-counter" [class.warning]="remainingChars < 30">
-          {{ remainingChars }} characters remaining
+          ✏️ {{ remainingChars }} characters remaining
         </div>
         <div class="error-message" *ngIf="translationForm.get('sentence')?.invalid && translationForm.get('sentence')?.touched">
           Please enter some text to translate
@@ -28,12 +28,12 @@
 
       <div class="button-container">
         <button type="submit" [disabled]="isLoading || translationForm.invalid || error === 'Translation service is currently unavailable. Please try again later.'">
-          {{ isLoading ? 'Translating...' : 'Translate' }}
+          {{ isLoading ? '🔄 Translating...' : '🔄 Translate' }}
         </button>
       </div>
 
       <div class="output-container" *ngIf="translation || error">
-        <label>Spanish Translation</label>
+        <label>🇪🇸 Spanish Translation</label>
         <div class="translation-result" *ngIf="translation">
           {{ translation }}
           <button class="copy-button" (click)="copyTranslation()" title="Copy to clipboard">
