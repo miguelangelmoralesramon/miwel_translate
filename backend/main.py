@@ -5,90 +5,33 @@ import torch
 import os
 import sys
 from typing import Dict, List
+from contextlib import asynccontextmanager
 
 # Add the directory containing transformer.py to the path
 sys.path.append(os.path.dirname(os.path.dirname(os.path.abspath(__file__))))
 
 # Import the Transformer model and required functions
-from transformer import Transformer, translate
+from transformer import Transformer, translate, spanish_vocab, english_vocab, max_sequence_length, eng_to_ind, esp_to_ind, START_TOKEN, END_TOKEN, PADDING_TOKEN
 
-app = FastAPI(title="Miwel Translate API", 
-              description="API for English to Spanish translation using a custom Transformer model",
-              version="1.0.0")
-
-# Configure CORS
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=["*"],  # For production, restrict this to your frontend domain
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# Define request and response models
-class TranslationInput(BaseModel):
-    sentence: str = Field(..., example="hello world", min_length=1)
-
-class TranslationOutput(BaseModel):
-    translation: str
-
-# Constants for tokenization and model configuration
-START_TOKEN = '<SOE>'
-PADDING_TOKEN = '<PAD>'
-END_TOKEN = '<EOE>'
-
-# Create vocabularies for English and Spanish
-english_vocab = [START_TOKEN, ' ', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/',
-                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                ':', '<', '=', '>', '?', '@',
-                '[', '\\', ']', '^', '_', '`',
-                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-                'm', 'n', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x',
-                'y', 'z',
-                '{', '|', '}', '~', PADDING_TOKEN, END_TOKEN]
-
-spanish_vocab = [START_TOKEN, ' ','¡', '!', '"', '#', '$', '%', '&', "'", '(', ')', '*', '+', ',', '-', '.', '/',
-                '0', '1', '2', '3', '4', '5', '6', '7', '8', '9',
-                ':', '<', '=', '>', '¿','?', '@',
-                '[', '\\', ']', '^', '_', '`',
-                'a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j', 'k', 'l',
-                'm', 'n','ñ', 'o', 'p', 'q', 'r', 's', 't', 'u', 'v', 'w', 'x',
-                'y', 'z','á','é','í','ó','ú',
-                '{', '|', '}', '~', PADDING_TOKEN, END_TOKEN]
-
-# Create mappings between indices and tokens
-ind_to_esp = {k:v for k,v in enumerate(spanish_vocab)}
-esp_to_ind = {v:k for k,v in enumerate(spanish_vocab)}
-ind_to_eng = {k:v for k,v in enumerate(english_vocab)}
-eng_to_ind = {v:k for k,v in enumerate(english_vocab)}
-
-# Model parameters
-d_model = 512
-ffn_hidden = 2048
-num_heads = 8
-drop_prob = 0.1
-num_layers = 4
-max_sequence_length = 300
-esp_vocab_size = len(spanish_vocab)
-
-# Function to check if a sentence has valid tokens
-def is_valid_tokens(sentence: str, vocab: List[str]) -> bool:
-    for token in list(set(sentence)):
-        if token not in vocab:
-            return False
-    return True
-
-# Function to check if a sentence is within the max length
-def is_valid_length(sentence: str, max_length: int) -> bool:
-    return len(list(sentence)) < (max_length - 1)
-
-# Load the model at startup
-device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+# Create a global model variable
 model = None
 
-@app.on_event("startup")
-async def startup_event():
+# Create the lifespan context manager
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    # Startup logic
     global model
+    
+    # Model parameters
+    d_model = 512
+    ffn_hidden = 2048
+    num_heads = 8
+    drop_prob = 0.1
+    num_layers = 4
+    max_sequence_length = 300
+    esp_vocab_size = len(spanish_vocab)
+    
+    device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
     
     # Initialize the transformer model
     model = Transformer(
@@ -138,6 +81,49 @@ async def startup_event():
     except Exception as e:
         print(f"Error loading model: {e}")
         model = None
+    
+    yield
+    
+    # Shutdown logic (if needed)
+    print("Application shutting down...")
+
+app = FastAPI(
+    title="Miwel Translate API", 
+    description="API for English to Spanish translation using a custom Transformer model",
+    version="1.0.0",
+    lifespan=lifespan
+)
+
+# Configure CORS
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # For production, restrict this to your frontend domain
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
+
+# Define request and response models
+class TranslationInput(BaseModel):
+    sentence: str = Field(..., example="hello world", min_length=1)
+
+class TranslationOutput(BaseModel):
+    translation: str
+
+# Function to check if a sentence has valid tokens
+def is_valid_tokens(sentence: str, vocab: List[str]) -> bool:
+    for token in list(set(sentence)):
+        if token not in vocab:
+            return False
+    return True
+
+# Function to check if a sentence is within the max length
+def is_valid_length(sentence: str, max_length: int) -> bool:
+    return len(list(sentence)) < (max_length - 1)
+
+# Load the model at startup
+device = torch.device('cuda') if torch.cuda.is_available() else torch.device('cpu')
+model = None
 
 @app.get("/health")
 async def health_check() -> Dict[str, str]:
