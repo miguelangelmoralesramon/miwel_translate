@@ -20,7 +20,8 @@ body {
   font-size: 16px;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  overflow: hidden;
+  overflow-x: hidden;
+  overflow-y: auto;
 }
 
 button {
@@ -53,10 +54,21 @@ textarea {
 }
 
 /* Simple responsive adjustments */
+@media (max-width: 968px) {
+  body {
+    font-size: 15px;
+  }
+}
+
 @media (max-width: 768px) {
   body {
     font-size: 14px;
-    overflow: auto;
+  }
+}
+
+@media (max-width: 480px) {
+  body {
+    font-size: 13px;
   }
 }
 

@@ -6,50 +6,60 @@
 
   <div class="translation-container">
     <form [formGroup]="translationForm" (ngSubmit)="translate()">
-      <div class="input-container">
-        <label for="englishInput">🇬🇧 English Text</label>
-        <textarea 
-          id="englishInput" 
-          formControlName="sentence"
-          placeholder="Type or paste English text here..."
-          [class.error]="translationForm.get('sentence')?.invalid && translationForm.get('sentence')?.touched"
-          (input)="clearTranslation()"
-          autocomplete="off"
-          autocorrect="off"
-          spellcheck="false"
-        ></textarea>
-        <div class="char-counter" [class.warning]="remainingChars < 30">
-          ✏️ {{ remainingChars }} characters remaining
-        </div>
-        <div class="error-message" *ngIf="translationForm.get('sentence')?.invalid && translationForm.get('sentence')?.touched">
-          Please enter some text to translate
-        </div>
-      </div>
-
-      <div class="button-container">
-        <button type="submit" [disabled]="isLoading || translationForm.invalid || error === 'Translation service is currently unavailable. Please try again later.'">
-          {{ isLoading ? '🔄 Translating...' : '🔄 Translate' }}
-        </button>
-      </div>
-
-      <div class="output-container">
-        <label>🇪🇸 Spanish Translation</label>
-        <div class="translation-result" *ngIf="translation || error">
-          <div *ngIf="translation">
-            {{ translation }}
-            <button class="copy-button" (click)="copyTranslation()" title="Copy to clipboard">
-              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-                <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
-                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
-              </svg>
-            </button>
-          </div>
-          <div class="error-result" *ngIf="error">
-            {{ error }}
+      <div class="translation-content">
+        <div class="input-wrapper">
+          <div class="input-container">
+            <label for="englishInput">🇬🇧 English Text</label>
+            <textarea 
+              id="englishInput" 
+              formControlName="sentence"
+              placeholder="Type or paste English text here..."
+              [class.error]="translationForm.get('sentence')?.invalid && translationForm.get('sentence')?.touched"
+              (input)="clearTranslation()"
+              autocomplete="off"
+              autocorrect="off"
+              spellcheck="false"
+            ></textarea>
+            <div class="char-counter" [class.warning]="remainingChars < 30">
+              ✏️ {{ remainingChars }} characters remaining
+            </div>
+            <div class="error-message" *ngIf="translationForm.get('sentence')?.invalid && translationForm.get('sentence')?.touched">
+              Please enter some text to translate
+            </div>
           </div>
         </div>
-        <div class="translation-placeholder" *ngIf="!translation && !error">
-          Translation will appear here...
+
+        <div class="button-container">
+          <button type="submit" [disabled]="isLoading || translationForm.invalid || error === 'Translation service is currently unavailable. Please try again later.'" [title]="isLoading ? 'Translating...' : 'Translate'">
+            <svg *ngIf="!isLoading" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="M5 12h14M12 5l7 7-7 7"></path>
+            </svg>
+            <div *ngIf="isLoading" class="loading-icon">🔄</div>
+            <span class="button-text">{{ isLoading ? 'Translating...' : 'Translate' }}</span>
+          </button>
+        </div>
+
+        <div class="output-wrapper">
+          <div class="output-container">
+            <label>🇪🇸 Spanish Translation</label>
+            <div class="translation-result" *ngIf="translation || error">
+              <div *ngIf="translation">
+                {{ translation }}
+                <button class="copy-button" (click)="copyTranslation()" title="Copy to clipboard">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect>
+                    <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path>
+                  </svg>
+                </button>
+              </div>
+              <div class="error-result" *ngIf="error">
+                {{ error }}
+              </div>
+            </div>
+            <div class="translation-placeholder" *ngIf="!translation && !error">
+              Translation will appear here...
+            </div>
+          </div>
         </div>
       </div>
     </form>
