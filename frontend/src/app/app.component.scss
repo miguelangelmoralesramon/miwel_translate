@@ -33,6 +33,16 @@ header {
   text-align: center;
   margin-bottom: 2.5rem;
   
+  .logo-container {
+    margin-bottom: 1rem;
+    
+    .app-logo {
+      width: 120px;
+      height: auto;
+      animation: fadeIn 0.8s ease-out;
+    }
+  }
+  
   h1 {
     font-size: 2.75rem;
     font-weight: 800;
@@ -455,6 +465,10 @@ footer {
   header h1 {
     font-size: 2.25rem;
   }
+
+  header .logo-container .app-logo {
+    width: 100px;
+  }
   
   .translation-container {
     padding: 1.5rem;
@@ -501,6 +515,10 @@ footer {
   
   header h1 {
     font-size: 1.75rem;
+  }
+
+  header .logo-container .app-logo {
+    width: 80px;
   }
   
   .translation-container {
